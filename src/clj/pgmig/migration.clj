@@ -23,11 +23,12 @@
 
 (defn migrate [options]
   (let [config (migration-config options)]
-    (println "About to perform migration")
+    (println "About to perform migrations")
     (case (migratus/migrate config)
-      :ignored (log/error "Table is reserved")
-      :failure (log/error "Migration failed")
-      nil (println "Success"))))
+      :ignore (log/error "Table is reserved")
+      :failure (log/error "Migrations failed")
+      nil (println "Success")
+      (log/error "Unknown return code from migratus.core/migrate"))))
 
 (defn init [options]
   (migratus/init (migration-config options)))
