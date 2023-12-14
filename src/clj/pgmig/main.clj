@@ -185,6 +185,19 @@
       (read-system-env)
       (read-system-props))))
 
+(defn my-out-fn
+  ([d] (my-out-fn nil d))
+  ([_o {:keys [level ?err #_vargs msg_ ?ns-str ?file hostname_
+              timestamp_ ?line]}]
+   (str
+    (when-let [ts (force timestamp_)] (str ts " "))
+    (force hostname_)  " "
+    (str/upper-case (name level))  " "
+    "[" (or ?ns-str ?file "?") ":" (or ?line "?") "] - "
+    (force msg_)
+    (let [err (force ?err)]
+      (str " >>> " err)))))
+
 (defn -main
   [& raw-args]
   (reset! env (read-env))
@@ -192,7 +205,8 @@
         (parse-and-validate-args raw-args)]
     (if-not exit-message
       (do
-        (start-app options)
+        (start-app (-> options
+                       (assoc :output-fn my-out-fn)))
         (run-action args options))
       (if ok?
         (exit exit-message)
